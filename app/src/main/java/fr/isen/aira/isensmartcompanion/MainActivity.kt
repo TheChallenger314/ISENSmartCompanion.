@@ -29,7 +29,7 @@ import fr.isen.aira.isensmartcompanion.ui.theme.ISENSmartCompanionTheme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+        enableEdgeToEdge() // Optional for edge-to-edge display
         setContent {
             ISENSmartCompanionTheme {
                 MainScreen()
@@ -53,7 +53,7 @@ fun MainScreen() {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top
         ) {
-            // Top: ISEN Rennes logo + "Smart Companion"
+            // Top section: ISEN Rennes logo + subtitle
             Column(
                 modifier = Modifier
                     .padding(top = 48.dp),
@@ -61,10 +61,10 @@ fun MainScreen() {
             ) {
                 // 1. ISEN Rennes Logo
                 Image(
-                    painter = painterResource(id = R.drawable.isen_rennes), // rename file if needed
+                    painter = painterResource(id = R.drawable.isen_rennes),
                     contentDescription = "ISEN Rennes Logo",
                     modifier = Modifier
-                        .size(180.dp) // Increased size by 50% (120 * 1.5 = 180)
+                        .size(180.dp) // Adjust the size as you prefer
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 // 2. Subtitle text
@@ -75,9 +75,11 @@ fun MainScreen() {
                     fontWeight = FontWeight.Medium
                 )
             }
+
+            // Spacer that pushes the input row to the bottom
             Spacer(modifier = Modifier.weight(1f))
 
-            // Bottom: Text field + Send button
+            // Bottom row: text field + send button
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -97,12 +99,13 @@ fun MainScreen() {
                 // Circular red button with a right arrow
                 FloatingActionButton(
                     onClick = {
-                        // Handle "Send" action here
+                        // Simple logic to display the user’s question in aiResponse
                         aiResponse = if (userQuestion.isNotBlank()) {
                             "You asked: $userQuestion"
                         } else {
                             "Please enter a question."
                         }
+                        // Clear the input after sending
                         userQuestion = ""
                     },
                     containerColor = Color.Red,
@@ -115,6 +118,8 @@ fun MainScreen() {
                     )
                 }
             }
+
+            // If there's a response, display it above the bottom row
             if (aiResponse.isNotEmpty()) {
                 Text(
                     text = aiResponse,

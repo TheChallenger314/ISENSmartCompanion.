@@ -10,10 +10,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -25,11 +24,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import fr.isen.aira.isensmartcompanion.ui.theme.ISENSmartCompanionTheme
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge() // Optional for edge-to-edge display
+        enableEdgeToEdge() // Pour un affichage en bord à bord
         setContent {
             ISENSmartCompanionTheme {
                 MainScreen()
@@ -44,92 +44,126 @@ fun MainScreen() {
     var userQuestion by remember { mutableStateOf("") }
     var aiResponse by remember { mutableStateOf("") }
 
-    Scaffold { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .background(MaterialTheme.colorScheme.surface),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Top
-        ) {
-            // Top section: ISEN Rennes logo + subtitle
-            Column(
-                modifier = Modifier
-                    .padding(top = 48.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                // 1. ISEN Rennes Logo
-                Image(
-                    painter = painterResource(id = R.drawable.isen_rennes),
-                    contentDescription = "ISEN Rennes Logo",
-                    modifier = Modifier
-                        .size(180.dp) // Adjust the size as you prefer
+    // État du tiroir (menu défilant)
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
+
+    ModalNavigationDrawer(
+        drawerContent = {
+            ModalDrawerSheet {
+                // Exemple d'éléments du menu défilant
+                NavigationDrawerItem(
+                    label = { Text("Accueil") },
+                    selected = false,
+                    onClick = { /* Gérer le clic sur "Accueil" */ },
+                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
                 )
-                Spacer(modifier = Modifier.height(8.dp))
-                // 2. Subtitle text
-                Text(
-                    text = "Smart Companion",
-                    color = Color.Gray,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Medium
+                NavigationDrawerItem(
+                    label = { Text("Paramètres") },
+                    selected = false,
+                    onClick = { /* Gérer le clic sur "Paramètres" */ },
+                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
                 )
+                // Ajoutez d'autres éléments selon vos besoins
             }
-
-            // Spacer that pushes the input row to the bottom
-            Spacer(modifier = Modifier.weight(1f))
-
-            // Bottom row: text field + send button
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // Text field (occupies most of the row)
-                OutlinedTextField(
-                    value = userQuestion,
-                    onValueChange = { userQuestion = it },
-                    placeholder = { Text("Ask something...") },
-                    modifier = Modifier.weight(1f)
-                )
-
-                Spacer(modifier = Modifier.width(8.dp))
-
-                // Circular red button with a right arrow
-                FloatingActionButton(
-                    onClick = {
-                        // Simple logic to display the user’s question in aiResponse
-                        aiResponse = if (userQuestion.isNotBlank()) {
-                            "You asked: $userQuestion"
-                        } else {
-                            "Please enter a question."
+        },
+        drawerState = drawerState
+    ) {
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = { Text("ISEN Smart Companion", color = Color.White) },
+                    navigationIcon = {
+                        IconButton(onClick = {
+                            scope.launch { drawerState.open() }
+                        }) {
+                            Icon(
+                                imageVector = Icons.Default.Menu,
+                                contentDescription = "Menu",
+                                tint = Color.White
+                            )
                         }
-                        // Clear the input after sending
-                        userQuestion = ""
                     },
-                    containerColor = Color.Red,
-                    modifier = Modifier.clip(CircleShape)
+                    colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Blue)
+                )
+            },
+            content = { innerPadding ->
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(innerPadding)
+                        .background(Color.White), // Fond blanc
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Top
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.ArrowForward,
-                        contentDescription = "Send",
-                        tint = Color.White
-                    )
+                    // Section supérieure : Logo ISEN Rennes + sous-titre
+                    Column(
+                        modifier = Modifier
+                            .padding(top = 48.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.isen_rennes),
+                            contentDescription = "Logo ISEN Rennes",
+                            modifier = Modifier.size(180.dp)
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Smart Companion",
+                            color = Color.Gray,
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.weight(1f))
+
+                    // Ligne inférieure : Champ de texte + Bouton envoyer
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        OutlinedTextField(
+                            value = userQuestion,
+                            onValueChange = { userQuestion = it },
+                            placeholder = { Text("Posez une question...") },
+                            modifier = Modifier.weight(1f)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        FloatingActionButton(
+                            onClick = {
+                                aiResponse = if (userQuestion.isNotBlank()) {
+                                    "Vous avez demandé : $userQuestion"
+                                } else {
+                                    "Veuillez entrer une question."
+                                }
+                                userQuestion = ""
+                            },
+                            containerColor = Color.Red,
+                            modifier = Modifier.clip(CircleShape)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.ArrowForward,
+                                contentDescription = "Envoyer",
+                                tint = Color.Black
+                            )
+                        }
+                    }
+
+                    if (aiResponse.isNotEmpty()) {
+                        Text(
+                            text = aiResponse,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            textAlign = TextAlign.Center
+                        )
+                    }
                 }
             }
-
-            // If there's a response, display it above the bottom row
-            if (aiResponse.isNotEmpty()) {
-                Text(
-                    text = aiResponse,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    textAlign = TextAlign.Center
-                )
-            }
-        }
+        )
     }
 }
 

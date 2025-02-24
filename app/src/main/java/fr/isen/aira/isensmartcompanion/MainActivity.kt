@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -111,7 +112,7 @@ fun MainScreen() {
                         Text(
                             text = "Smart Companion",
                             color = Color.Gray,
-                            fontSize = 18.sp,
+                            fontSize = 16.sp,
                             fontWeight = FontWeight.Medium
                         )
                     }
@@ -128,10 +129,13 @@ fun MainScreen() {
                         OutlinedTextField(
                             value = userQuestion,
                             onValueChange = { userQuestion = it },
-                            placeholder = { Text("Posez une question...") },
+                            placeholder = { Text("Posez une question...", color = Color.LightGray) },
+                            textStyle = TextStyle(color = Color.Black), // Texte saisi en noir
                             modifier = Modifier.weight(1f)
                         )
+
                         Spacer(modifier = Modifier.width(8.dp))
+
                         FloatingActionButton(
                             onClick = {
                                 aiResponse = if (userQuestion.isNotBlank()) {
@@ -147,18 +151,20 @@ fun MainScreen() {
                             Icon(
                                 imageVector = Icons.Default.ArrowForward,
                                 contentDescription = "Envoyer",
-                                tint = Color.Black
+                                tint = Color.White
                             )
                         }
                     }
 
+                    // Affiche la réponse de l'IA en noir, si elle n'est pas vide
                     if (aiResponse.isNotEmpty()) {
                         Text(
                             text = aiResponse,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(16.dp),
-                            textAlign = TextAlign.Center
+                            textAlign = TextAlign.Center,
+                            color = Color.Black // Réponse en noir
                         )
                     }
                 }

@@ -203,7 +203,8 @@ fun HomeScreen() {
 @Composable
 fun EventsScreen() {
     val context = LocalContext.current
-    // Fake events list
+
+    // Example list of events
     val events = listOf(
         Event(1, "BDE Evening", "Enjoy a fun evening with BDE members!", "2023-09-10", "ISEN Rennes", "Social"),
         Event(2, "Gala", "A formal gala night.", "2023-10-15", "ISEN Rennes", "Formal"),
@@ -212,14 +213,15 @@ fun EventsScreen() {
 
     LazyColumn(modifier = Modifier.padding(16.dp)) {
         items(events) { event ->
+            // Each event is displayed in a Card
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 8.dp)
                     .clickable {
-                        // Launch EventDetailActivity passing the event object
+                        // When the user clicks on this event, we launch EventDetailActivity
                         val intent = Intent(context, EventDetailActivity::class.java)
-                        intent.putExtra("event", event)
+                        intent.putExtra("event", event)  // Put the entire Event object
                         context.startActivity(intent)
                     },
                 elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
@@ -233,6 +235,7 @@ fun EventsScreen() {
         }
     }
 }
+
 
 // --- 5. Page 3 Screen (placeholder) ---
 @Composable
@@ -250,14 +253,18 @@ fun Page3Screen() {
 class EventDetailActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         setContent {
             ISENSmartCompanionTheme {
+                // Retrieve the event from the Intent
                 val event = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
                     intent.getParcelableExtra("event", Event::class.java)
                 } else {
                     @Suppress("DEPRECATION")
                     intent.getParcelableExtra<Event>("event")
                 }
+
+                // Display the event details
                 EventDetailScreen(event)
             }
         }
@@ -271,8 +278,8 @@ fun EventDetailScreen(event: Event?) {
             .fillMaxSize()
             .background(Color.White)
             .padding(16.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+        verticalArrangement = Arrangement.Top,
+        horizontalAlignment = Alignment.Start
     ) {
         if (event != null) {
             Text(text = event.title, fontSize = 24.sp, color = Color.Black)
@@ -283,7 +290,7 @@ fun EventDetailScreen(event: Event?) {
             Spacer(modifier = Modifier.height(8.dp))
             Text(text = event.description, fontSize = 14.sp, color = Color.Black)
         } else {
-            Text("Event details not available", color = Color.Black)
+            Text("Event not found.", color = Color.Black)
         }
     }
 }

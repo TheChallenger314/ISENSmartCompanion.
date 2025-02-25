@@ -1,6 +1,7 @@
 package fr.isen.aira.isensmartcompanion
 
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
@@ -8,7 +9,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,11 +20,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -34,6 +30,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -53,18 +50,18 @@ import androidx.navigation.compose.rememberNavController
 import fr.isen.aira.isensmartcompanion.ui.theme.ISENSmartCompanionTheme
 import kotlinx.parcelize.Parcelize
 
-// --- 1. Define the Event data class ---
+// 1. Data class pour modéliser un Event (Parcelable)
 @Parcelize
 data class Event(
-    val id: Int,
-    val title: String,
-    val description: String,
+    val category: String,
     val date: String,
+    val description: String,
+    val id: String,
     val location: String,
-    val category: String
+    val title: String
 ) : Parcelable
 
-// --- 2. Main Activity with Navigation Setup ---
+// 2. MainActivity avec Navigation Compose
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -81,49 +78,53 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MainApp() {
     val navController = rememberNavController()
+    // Récupération éventuelle de l'extra "destination" passée par EventDetailActivity
+    val context = LocalContext.current
+    val destination = (context as? ComponentActivity)?.intent?.getStringExtra("destination")
 
     Scaffold(
         containerColor = Color.White,
-        // TopAppBar with blue background, logo at left and text at right
         topBar = {
+            // TopAppBar bleu avec logo à gauche et texte à droite
             TopAppBar(
                 title = {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Image(
                             painter = painterResource(id = R.drawable.isen_rennes),
                             contentDescription = "Logo ISEN Rennes",
-                            modifier = Modifier.size(70.dp)
+                            modifier = Modifier.size(40.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = "ISEN Smart Compagnon",
                             color = Color.White,
-                            fontSize = 20.sp
+                            fontSize = 18.sp
                         )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Blue)
             )
         },
-        // Bottom navigation bar with a red background and enlarged text
-        bottomBar = {
-            BottomNavigationBar(navController)
-        }
+        bottomBar = { BottomNavigationBar(navController) }
     ) { innerPadding ->
-        // Content area with white background
         Box(
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize()
                 .background(Color.White)
         ) {
-            NavHost(
-                navController = navController,
-                startDestination = "home"
-            ) {
+            NavHost(navController = navController, startDestination = "home") {
                 composable("home") { HomeScreen() }
                 composable("events") { EventsScreen() }
                 composable("page3") { Page3Screen() }
+            }
+            // Si un extra "destination" est présent, naviguer vers l'écran correspondant
+            destination?.let {
+                LaunchedEffect(it) {
+                    navController.navigate(it) {
+                        popUpTo("home") { inclusive = true }
+                    }
+                }
             }
         }
     }
@@ -157,7 +158,7 @@ fun BottomNavigationBar(navController: NavController) {
     }
 }
 
-// --- 3. Home Screen (with Q&A interface) ---
+// 3. HomeScreen avec interface Q&R
 @Composable
 fun HomeScreen() {
     var userQuestion by remember { mutableStateOf("") }
@@ -199,45 +200,7 @@ fun HomeScreen() {
     }
 }
 
-// --- 4. Events Screen with LazyColumn ---
-@Composable
-fun EventsScreen() {
-    val context = LocalContext.current
-
-    // Example list of events
-    val events = listOf(
-        Event(1, "BDE Evening", "Enjoy a fun evening with BDE members!", "2023-09-10", "ISEN Rennes", "Social"),
-        Event(2, "Gala", "A formal gala night.", "2023-10-15", "ISEN Rennes", "Formal"),
-        Event(3, "Cohesion Day", "Team building and fun activities.", "2023-11-05", "ISEN Rennes", "Team")
-    )
-
-    LazyColumn(modifier = Modifier.padding(16.dp)) {
-        items(events) { event ->
-            // Each event is displayed in a Card
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp)
-                    .clickable {
-                        // When the user clicks on this event, we launch EventDetailActivity
-                        val intent = Intent(context, EventDetailActivity::class.java)
-                        intent.putExtra("event", event)  // Put the entire Event object
-                        context.startActivity(intent)
-                    },
-                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-            ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text(text = event.title, fontSize = 20.sp, color = Color.Black)
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(text = event.date, fontSize = 14.sp, color = Color.Gray)
-                }
-            }
-        }
-    }
-}
-
-
-// --- 5. Page 3 Screen (placeholder) ---
+// 4. Page3Screen (placeholder)
 @Composable
 fun Page3Screen() {
     Column(modifier = Modifier.padding(16.dp)) {
@@ -249,28 +212,106 @@ fun Page3Screen() {
     }
 }
 
-// --- 6. Event Detail Activity and Screen ---
+// 5. EventDetailActivity avec barre de navigation similaire
 class EventDetailActivity : ComponentActivity() {
+    @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         setContent {
             ISENSmartCompanionTheme {
-                // Retrieve the event from the Intent
-                val event = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+                val event = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                     intent.getParcelableExtra("event", Event::class.java)
                 } else {
                     @Suppress("DEPRECATION")
-                    intent.getParcelableExtra<Event>("event")
+                    intent.getParcelableExtra("event")
                 }
-
-                // Display the event details
-                EventDetailScreen(event)
+                // On affiche un Scaffold avec topBar et bottomBar identiques
+                Scaffold(
+                    containerColor = Color.White,
+                    topBar = {
+                        TopAppBar(
+                            title = {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Image(
+                                        painter = painterResource(id = R.drawable.isen_rennes),
+                                        contentDescription = "Logo ISEN Rennes",
+                                        modifier = Modifier.size(40.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(
+                                        text = "ISEN Smart Compagnon",
+                                        color = Color.White,
+                                        fontSize = 18.sp
+                                    )
+                                }
+                            },
+                            colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Blue)
+                        )
+                    },
+                    bottomBar = {
+                        // Barre de navigation pour l'Activity de détail
+                        BottomNavigationBarForDetail()
+                    }
+                ) { innerPadding ->
+                    Box(
+                        modifier = Modifier
+                            .padding(innerPadding)
+                            .fillMaxSize()
+                            .background(Color.White)
+                    ) {
+                        EventDetailScreen(event)
+                    }
+                }
             }
         }
     }
 }
 
+// Bottom navigation bar for EventDetailActivity qui lance MainActivity
+@Composable
+fun BottomNavigationBarForDetail() {
+    val context = LocalContext.current
+    NavigationBar(containerColor = Color.Red) {
+        NavigationBarItem(
+            selected = false,
+            onClick = {
+                // Lancer MainActivity et afficher l'écran Home
+                val intent = Intent(context, MainActivity::class.java)
+                intent.putExtra("destination", "home")
+                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                context.startActivity(intent)
+            },
+            label = { Text("Home", fontSize = 28.sp) },
+            icon = {}
+        )
+        NavigationBarItem(
+            selected = false,
+            onClick = {
+                // Lancer MainActivity et afficher l'écran Events
+                val intent = Intent(context, MainActivity::class.java)
+                intent.putExtra("destination", "events")
+                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                context.startActivity(intent)
+            },
+            label = { Text("Events", fontSize = 28.sp) },
+            icon = {}
+        )
+        NavigationBarItem(
+            selected = false,
+            onClick = {
+                // Lancer MainActivity et afficher l'écran Page 3
+                val intent = Intent(context, MainActivity::class.java)
+                intent.putExtra("destination", "page3")
+                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                context.startActivity(intent)
+            },
+            label = { Text("Page 3", fontSize = 28.sp) },
+            icon = {}
+        )
+    }
+}
+
+// 6. EventDetailScreen affichant les détails de l'événement
 @Composable
 fun EventDetailScreen(event: Event?) {
     Column(

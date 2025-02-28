@@ -61,6 +61,7 @@ data class Event(
     val title: String
 ) : Parcelable
 
+
 // 2. MainActivity avec Navigation Compose
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

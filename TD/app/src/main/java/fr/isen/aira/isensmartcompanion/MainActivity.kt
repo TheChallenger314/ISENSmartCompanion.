@@ -7,30 +7,41 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.unit.*
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.navigation.compose.*
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import fr.isen.aira.isensmartcompanion.ui.theme.ISENSmartCompanionTheme
-import java.io.Serializable
-
-// -------------------
-// DATA CLASS: Event
-// -------------------
-data class Event(
-    val category: String,
-    val date: String,
-    val description: String,
-    val id: String,
-    val location: String,
-    val title: String
-) : Serializable
 
 // -------------------------
 // MAIN ACTIVITY
@@ -85,7 +96,7 @@ fun MainApp() {
             NavHost(navController = navController, startDestination = "home") {
                 composable("home") { HomeScreen() }
                 composable("events") { EventsScreen() }
-                composable("page3") { Page3Screen() }
+                composable("PageHistory") { PageHistory() }
             }
         }
     }
@@ -115,7 +126,7 @@ fun BottomNavigationBar(navController: NavController) {
         )
         NavigationBarItem(
             selected = false,
-            onClick = { navController.navigate("page3") },
+            onClick = { navController.navigate("PageHistory") },
             label = { Text("Page 3", fontSize = 28.sp) },
             icon = {}
         )
@@ -170,10 +181,10 @@ fun HomeScreen() {
 // PAGE 3 (PLACEHOLDER)
 // -------------------------
 @Composable
-fun Page3Screen() {
+fun PageHistory() {
     Column(modifier = Modifier.padding(16.dp)) {
         Text(
-            text = "Bienvenue sur la Page 3",
+            text = "Bienvenue sur la page history",
             color = Color.Black,
             fontSize = 20.sp
         )

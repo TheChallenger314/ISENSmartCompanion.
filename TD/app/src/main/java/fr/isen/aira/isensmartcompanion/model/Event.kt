@@ -1,12 +1,21 @@
 package fr.isen.aira.isensmartcompanion.model
 
-import java.io.Serializable
+import android.os.Parcelable
+import com.google.gson.annotations.SerializedName
+import kotlinx.parcelize.Parcelize
 
+@Parcelize
 data class Event(
-    val category: String,
-    val date: String,
-    val description: String,
+    @SerializedName("id")
     val id: String,
+    @SerializedName("title")
+    val title: String,
+    @SerializedName("description")
+    val description: String,
+    @SerializedName("date")
+    val date: String,
+    @SerializedName("location")
     val location: String,
-    val title: String
-) : Serializable
+    @SerializedName("category")
+    val category: String
+) : Parcelable

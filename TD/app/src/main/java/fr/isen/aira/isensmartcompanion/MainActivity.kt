@@ -171,7 +171,7 @@ fun HomeScreen() {
             Text(
                 text = aiResponse,
                 modifier = Modifier.padding(top = 8.dp),
-                color = Color.Black
+                color = Color.Black.
             )
         }
     }
